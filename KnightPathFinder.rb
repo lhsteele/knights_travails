@@ -6,8 +6,9 @@ class KnightPathFinder
 
   def initialize(pos)
     @pos = pos 
+    @considered_positions = [pos]
     @start_pos = PolyTreeNode.new(pos)
-    self.build_move_tree
+    #self.build_move_tree
   end
 
   def self.valid_moves(pos)
@@ -16,6 +17,8 @@ class KnightPathFinder
     possibilities = [[2, -1], [2, 1], [1, 2], [1, -2], [-2, 1], [-2, -1], [-1, -2], [-1, 2]]
     possibilities.each do |poss|
       new_move = [(poss[0] + x), (poss[1] + y)]
+      #line 21 is wordy and I think I can use spaceship operator here?
+      #will refactor if time
       if new_move.first >= 0 && new_move.first <= 7 && new_move.last >= 0 && new_move.last <= 7
         poss_moves << new_move
       end
@@ -23,37 +26,39 @@ class KnightPathFinder
     poss_moves
   end
 
-  #the pos being passed in should be an array of 2 numbers, which is the starting pos defined when we initialize a knight
   def new_move_positions(pos)
-    #posible_pos = Array.new(8) { Array.new([]) }
-    new_pos = []
-    x, y = pos 
-    one_move = 1
-    two_moves = 2
-    posible_pos.each do |sub_pos|
-    
-    @considered_positions = [pos]
+    poss_moves = KnightPathFinder.valid_moves(pos).reject { |move| @considered_positions.include?(move) }
+    @considered_positions += poss_moves
+    @considered_positions
+  end
+
+  def build_move_tree(target_pos)
+    #use new_move_positions, which takes in a starting position
+    #Use BFS and a queue to process in FIFO order
+    #start with a root which will be the starting positions, @pos
+    #iterate through the @considered positions array ??
+    tar_x, tar_y = target_pos 
+    root = self.pos 
+    arr = @considered_positions
+    path = []
+    until arr.empty?
+      #the thing I'm going to be checking is if the next position in the arr == target pos.
+      #if it doesn't, then I will call new_move_positions on the current position and add to the end of the arr
+      current_check = arr.shift 
+      #path << current_check
+      return current_check if current_check[0] == tar_x && current_check[1] == tar_y 
+      arr.concat(new_move_positions(current_check))
+      #path
     end
+    nil 
   end
-
-  def valid_moves
-
-  end
-  #valid moves method should check for all possibilities first
-  #return an array of positions as long as they're on the board 
-  #contain an array 
-
-  def build_move_tree
-
-  end
-
-
-
 
 end
 
 kpf = KnightPathFinder.new([0,0])
-KnightPathFinder.valid_moves([7,1])
+# KnightPathFinder.valid_moves([0, 1])
+kpf.new_move_positions([0,0])
+p kpf.build_move_tree([3, 4])
 
 # a knight moves 2 sq horizontally, then 1 vertically
 #or
